@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos MySQL
+  moda-lujo-db:
+    image: mysql:8.0
+    container_name: db-a28306  # Tu nombre de contenedor personalizado
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: manolito
+      MYSQL_DATABASE: ModaDB
+    ports:
+      - "6038:3306"  # Puerto EXTERNO 6038 (Tus cifras invertidas) -> Puerto INTERNO 3306
+    volumes:
+      # Persistencia de datos (para no perder lo que guardes al apagar)
+      - mysql_data_28306:/var/lib/mysql
+      # Carga automática de tu script SQL al iniciar por primera vez
+      - ./createDbMySqlServer.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  mysql_data_28306:
