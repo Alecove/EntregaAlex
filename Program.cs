@@ -12,9 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
 builder.Services.AddScoped<IMarcaService, MarcaService>();
 builder.Services.AddScoped<IDiseñadorService, DiseñadorService>();
-
+builder.Services.AddScoped<IColeccionService, ColeccionService>();       
+builder.Services.AddScoped<IColeccionRepository, ColeccionRepository>(); 
 // === NUEVO: Registramos el Repositorio de Diseñador ===
 builder.Services.AddScoped<IDiseñadorRepository, DiseñadorRepository>();
+
+
 
 
 // 2. SWAGGER
