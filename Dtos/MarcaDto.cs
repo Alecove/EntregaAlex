@@ -16,8 +16,7 @@ namespace EntregaAlex.Dtos
         [Range(1800, 2025, ErrorMessage = "El año debe estar entre 1800 y 2025")]
         public int AnioFundacion { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "El valor de mercado debe ser positivo")]
-        public decimal ValorMercadoMillones { get; set; }
+        
 
         public bool EsAltaCostura { get; set; }
     }

@@ -1,4 +1,4 @@
-using MySqlConnector; // <--- ESTO ES LO QUE CAMBIA RESPECTO AL PROFE (Él usa SqlClient)
+using MySqlConnector; 
 using EntregaAlex.Models;
 using Microsoft.Extensions.Configuration;
 
@@ -10,7 +10,6 @@ namespace EntregaAlex.Repository
 
         public MarcaRepository(IConfiguration configuration)
         {
-            // El profesor lo hace así: lee la conexión directamente aquí
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
         }
 
@@ -23,8 +22,8 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // QUERY MANUAL (Igual que el profe)
-                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura FROM Marcas";
+                // HE QUITADO ValorMercadoMillones DE AQUÍ
+                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, EsAltaCostura FROM Marcas";
 
                 using (var command = new MySqlCommand(query, connection))
                 using (var reader = await command.ExecuteReaderAsync())
@@ -37,8 +36,8 @@ namespace EntregaAlex.Repository
                             Nombre = reader.GetString(1),
                             PaisOrigen = reader.GetString(2),
                             AnioFundacion = reader.GetInt32(3),
-                            EsAltaCostura = reader.GetBoolean(5)
-                            // Nota: Omito fechas complejas para simplificar, igual que el ejemplo del profe
+                            // ANTES ESTO ERA EL 5, AHORA ES EL 4 PORQUE QUITAMOS UNA COLUMNA
+                            EsAltaCostura = reader.GetBoolean(4) 
                         };
                         listaMarcas.Add(marca);
                     }
@@ -56,7 +55,8 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura FROM Marcas WHERE Id = @Id";
+                // HE QUITADO ValorMercadoMillones DE AQUÍ TAMBIÉN
+                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, EsAltaCostura FROM Marcas WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(query, connection))
                 {
@@ -72,7 +72,8 @@ namespace EntregaAlex.Repository
                                 Nombre = reader.GetString(1),
                                 PaisOrigen = reader.GetString(2),
                                 AnioFundacion = reader.GetInt32(3),
-                                EsAltaCostura = reader.GetBoolean(5)
+                                // AQUÍ TAMBIÉN CAMBIAMOS EL ÍNDICE A 4
+                                EsAltaCostura = reader.GetBoolean(4)
                             };
                         }
                     }
@@ -88,9 +89,9 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // OJO: En MySQL para obtener el ID generado se usa SELECT LAST_INSERT_ID();
-                string query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura, FechaAlianza) 
-                                 VALUES (@Nombre, @Pais, @Anio, @Valor, @EsAlta, @Fecha);
+                // BORRAMOS ValorMercadoMillones Y SU PARÁMETRO @Valor
+                string query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, EsAltaCostura, FechaAlianza) 
+                                 VALUES (@Nombre, @Pais, @Anio, @EsAlta, @Fecha);
                                  SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -98,10 +99,10 @@ namespace EntregaAlex.Repository
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
                     command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
                     command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
+                    // HE BORRADO LA LÍNEA DE @Valor QUE DABA PROBLEMAS
                     command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
                     command.Parameters.AddWithValue("@Fecha", DateTime.Now);
 
-                    // Ejecutamos y recuperamos el ID generado
                     var idGenerado = await command.ExecuteScalarAsync();
                     if (idGenerado != null)
                     {
@@ -119,9 +120,10 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
+                // BORRAMOS ValorMercadoMillones DEL UPDATE
                 string query = @"UPDATE Marcas 
                                  SET Nombre = @Nombre, PaisOrigen = @Pais, AnioFundacion = @Anio, 
-                                     ValorMercadoMillones = @Valor, EsAltaCostura = @EsAlta 
+                                     EsAltaCostura = @EsAlta 
                                  WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -130,16 +132,17 @@ namespace EntregaAlex.Repository
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
                     command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
                     command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
+                    // BORRADO EL PARÁMETRO @Valor
                     command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
 
                     int filasAfectadas = await command.ExecuteNonQueryAsync();
-                    if (filasAfectadas == 0) return null; // No existía
+                    if (filasAfectadas == 0) return null; 
                 }
             }
             return marca;
         }
 
-        // 5. BORRAR (DELETE)
+        // 5. BORRAR (DELETE) - ESTE SE QUEDA IGUAL
         public async Task<bool> DeleteAsync(int id)
         {
             using (var connection = new MySqlConnection(_connectionString))
