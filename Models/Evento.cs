@@ -1,27 +1,31 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace EntregaAlex.Models
 {
-    public class Evento : EntidadModa
+    public class Evento
     {
-        
+        [Key]
+        public int Id { get; set; }
 
         [Required]
-        public string Titulo { get; set; } = string.Empty; // Ej: Presentación Otoño/Invierno
+        public string Ciudad { get; set; } = string.Empty;
 
-        public string? DescripcionActividades { get; set; } // "Meet & greet, pasarela..."
+        public string UbicacionExacta { get; set; } = string.Empty;
 
-        public int EntradasDisponibles { get; set; }
+        public int CapacidadAsistentes { get; set; }
 
-        [Range(0, 10000)]
-        public decimal PrecioEntradaBase { get; set; }
+        public decimal CosteEntrada { get; set; }
 
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; } // Para cumplir el requisito de rango de fechas
+        public bool EsBenefico { get; set; }
 
+        public DateTime FechaEvento { get; set; }
 
+        // RELACIÓN CON COLECCIÓN (Presentan una colección en el evento)
+        public int ColeccionId { get; set; }
+        [ForeignKey("ColeccionId")]
         [JsonIgnore]
-        public List<Entrada>? EntradasVendidas { get; set; }
+        public Coleccion? Coleccion { get; set; }
     }
 }

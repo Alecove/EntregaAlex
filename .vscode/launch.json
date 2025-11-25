@@ -1,7 +1,28 @@
 {
-    // Use IntelliSense para saber los atributos posibles.
-    // Mantenga el puntero para ver las descripciones de los existentes atributos.
-    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": []
+    "configurations": [
+        {
+            "name": "Arrancar API (EntregaAlex)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // ESTA ES LA LÍNEA IMPORTANTE: Apunta a tu DLL compilada
+            "program": "${workspaceFolder}/bin/Debug/net8.0/EntregaAlex.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            // Esto le dice que abra el navegador cuando detecte que la API arrancó
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger" 
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+    ]
 }

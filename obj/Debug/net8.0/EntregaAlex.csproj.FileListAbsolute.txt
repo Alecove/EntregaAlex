@@ -33,3 +33,4 @@ D:\Alejandro\EntregaAlex\obj\Debug\net8.0\refint\EntregaAlex.dll
 D:\Alejandro\EntregaAlex\obj\Debug\net8.0\EntregaAlex.pdb
 D:\Alejandro\EntregaAlex\obj\Debug\net8.0\EntregaAlex.genruntimeconfig.cache
 D:\Alejandro\EntregaAlex\obj\Debug\net8.0\ref\EntregaAlex.dll
+D:\Alejandro\EntregaAlex\obj\Debug\net8.0\EntregaAlex.sourcelink.json

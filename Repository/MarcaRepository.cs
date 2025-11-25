@@ -1,156 +1,160 @@
-using MySqlConnector;
+using MySqlConnector; // <--- ESTO ES LO QUE CAMBIA RESPECTO AL PROFE (Él usa SqlClient)
 using EntregaAlex.Models;
-using System.Data;
-using Microsoft.Extensions.Configuration; // <-- ESTA LÍNEA ES CLAVE
+using Microsoft.Extensions.Configuration;
 
 namespace EntregaAlex.Repository
 {
-    public interface IMarcaRepository
-    {
-        Task<List<Marca>> GetAllAsync();
-        Task<Marca?> GetByIdAsync(int id);
-        Task<Marca> CreateAsync(Marca marca);
-        Task<Marca?> UpdateAsync(Marca marca);
-        Task<bool> DeleteAsync(int id);
-    }
-
     public class MarcaRepository : IMarcaRepository
     {
         private readonly string _connectionString;
 
         public MarcaRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            // El profesor lo hace así: lee la conexión directamente aquí
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
         }
 
+        // 1. OBTENER TODAS
         public async Task<List<Marca>> GetAllAsync()
         {
-            var lista = new List<Marca>();
+            var listaMarcas = new List<Marca>();
 
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var query = "SELECT * FROM Marcas";
-                
+
+                // QUERY MANUAL (Igual que el profe)
+                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura FROM Marcas";
+
                 using (var command = new MySqlCommand(query, connection))
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        lista.Add(MapToMarca(reader));
+                        var marca = new Marca
+                        {
+                            Id = reader.GetInt32(0),
+                            Nombre = reader.GetString(1),
+                            PaisOrigen = reader.GetString(2),
+                            AnioFundacion = reader.GetInt32(3),
+                            EsAltaCostura = reader.GetBoolean(5)
+                            // Nota: Omito fechas complejas para simplificar, igual que el ejemplo del profe
+                        };
+                        listaMarcas.Add(marca);
                     }
                 }
             }
-            return lista;
+            return listaMarcas;
         }
 
+        // 2. OBTENER POR ID
         public async Task<Marca?> GetByIdAsync(int id)
         {
+            Marca? marca = null;
+
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var query = "SELECT * FROM Marcas WHERE Id = @Id";
-                
+
+                string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura FROM Marcas WHERE Id = @Id";
+
                 using (var command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
-                    
+
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
-                            return MapToMarca(reader);
+                            marca = new Marca
+                            {
+                                Id = reader.GetInt32(0),
+                                Nombre = reader.GetString(1),
+                                PaisOrigen = reader.GetString(2),
+                                AnioFundacion = reader.GetInt32(3),
+                                EsAltaCostura = reader.GetBoolean(5)
+                            };
                         }
                     }
                 }
             }
-            return null;
+            return marca;
         }
 
+        // 3. CREAR (INSERT)
         public async Task<Marca> CreateAsync(Marca marca)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                // Importante: Insertamos los 6 campos obligatorios
-                var query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura, FechaAlianza) 
-                              VALUES (@Nombre, @PaisOrigen, @AnioFundacion, @ValorMercadoMillones, @EsAltaCostura, @FechaAlianza);
-                              SELECT LAST_INSERT_ID();";
+
+                // OJO: En MySQL para obtener el ID generado se usa SELECT LAST_INSERT_ID();
+                string query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura, FechaAlianza) 
+                                 VALUES (@Nombre, @Pais, @Anio, @Valor, @EsAlta, @Fecha);
+                                 SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
-                    command.Parameters.AddWithValue("@PaisOrigen", marca.PaisOrigen);
-                    command.Parameters.AddWithValue("@AnioFundacion", marca.AnioFundacion);
-                    command.Parameters.AddWithValue("@ValorMercadoMillones", marca.ValorMercadoMillones);
-                    command.Parameters.AddWithValue("@EsAltaCostura", marca.EsAltaCostura);
-                    command.Parameters.AddWithValue("@FechaAlianza", marca.FechaAlianza);
+                    command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
+                    command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
+                    command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
+                    command.Parameters.AddWithValue("@Fecha", DateTime.Now);
 
-                    var newId = await command.ExecuteScalarAsync();
-                    marca.Id = Convert.ToInt32(newId);
+                    // Ejecutamos y recuperamos el ID generado
+                    var idGenerado = await command.ExecuteScalarAsync();
+                    if (idGenerado != null)
+                    {
+                        marca.Id = Convert.ToInt32(idGenerado);
+                    }
                 }
             }
             return marca;
         }
 
+        // 4. ACTUALIZAR (UPDATE)
         public async Task<Marca?> UpdateAsync(Marca marca)
         {
-             using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var query = @"UPDATE Marcas 
-                              SET Nombre = @Nombre, 
-                                  PaisOrigen = @PaisOrigen, 
-                                  AnioFundacion = @AnioFundacion, 
-                                  ValorMercadoMillones = @ValorMercadoMillones, 
-                                  EsAltaCostura = @EsAltaCostura
-                              WHERE Id = @Id";
+
+                string query = @"UPDATE Marcas 
+                                 SET Nombre = @Nombre, PaisOrigen = @Pais, AnioFundacion = @Anio, 
+                                     ValorMercadoMillones = @Valor, EsAltaCostura = @EsAlta 
+                                 WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", marca.Id);
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
-                    command.Parameters.AddWithValue("@PaisOrigen", marca.PaisOrigen);
-                    command.Parameters.AddWithValue("@AnioFundacion", marca.AnioFundacion);
-                    command.Parameters.AddWithValue("@ValorMercadoMillones", marca.ValorMercadoMillones);
-                    command.Parameters.AddWithValue("@EsAltaCostura", marca.EsAltaCostura);
+                    command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
+                    command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
+                    command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
 
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
-                    if (rowsAffected == 0) return null;
+                    int filasAfectadas = await command.ExecuteNonQueryAsync();
+                    if (filasAfectadas == 0) return null; // No existía
                 }
             }
             return marca;
         }
 
+        // 5. BORRAR (DELETE)
         public async Task<bool> DeleteAsync(int id)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                var query = "DELETE FROM Marcas WHERE Id = @Id";
+
+                string query = "DELETE FROM Marcas WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
-                    return rowsAffected > 0;
+                    int filasAfectadas = await command.ExecuteNonQueryAsync();
+                    return filasAfectadas > 0;
                 }
             }
-        }
-
-        private Marca MapToMarca(MySqlDataReader reader)
-        {
-            return new Marca
-            {
-                Id = reader.GetInt32("Id"),
-                Nombre = reader.GetString("Nombre"),
-                PaisOrigen = reader.GetString("PaisOrigen"),
-                AnioFundacion = reader.GetInt32("AnioFundacion"),
-                // Manejo seguro de nulos para decimales si fuera necesario, aquí asumimos que siempre tiene valor
-                ValorMercadoMillones = reader.GetDecimal("ValorMercadoMillones"),
-                EsAltaCostura = reader.GetBoolean("EsAltaCostura"),
-                FechaAlianza = reader.GetDateTime("FechaAlianza")
-            };
         }
     }
 }

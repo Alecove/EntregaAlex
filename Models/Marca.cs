@@ -3,28 +3,27 @@ using System.Text.Json.Serialization;
 
 namespace EntregaAlex.Models
 {
-    public class Marca : EntidadModa;
+    public class Marca
     {
-        
+        [Key]
+        public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre de la marca es obligatorio")]
+        [Required(ErrorMessage = "El nombre es obligatorio")]
         [StringLength(50)]
-        public string Nombre { get; set; } = string.Empty; // Ej: Gucci
+        public string Nombre { get; set; } = string.Empty;
 
         [Required]
-        public string PaisOrigen { get; set; } = string.Empty; // Ej: Italia
+        public string PaisOrigen { get; set; } = string.Empty;
 
         [Range(1800, 2025)]
-        public int AnioFundacion { get; set; } // Atributo INT
+        public int AnioFundacion { get; set; }
 
-        public decimal ValorMercadoMillones { get; set; } // Atributo DECIMAL
+        public bool EsAltaCostura { get; set; }
 
-        public bool EsAltaCostura { get; set; } // Atributo BOOLEAN (Haute Couture?)
+    
 
-        public DateTime FechaAlianza { get; set; } // Atributo DATETIME (Cuándo firmaron con tu app)
-
-        // Relación: Una Marca tiene una lista de Eventos
-        [JsonIgnore] // Evita bucles infinitos al convertir a JSON
-        public List<Evento>? Eventos { get; set; }
+        // RELACIONES
+        [JsonIgnore]
+        public List<Diseñador>? Diseñadores { get; set; }
     }
 }

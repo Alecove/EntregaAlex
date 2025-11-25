@@ -4,17 +4,6 @@ using EntregaAlex.Dtos;
 
 namespace EntregaAlex.Services
 {
-    // Definimos el contrato del servicio
-    public interface IMarcaService
-    {
-        Task<List<MarcaResponseDto>> GetAllMarcasAsync();
-        Task<MarcaResponseDto?> GetMarcaByIdAsync(int id);
-        Task<MarcaResponseDto> CreateMarcaAsync(MarcaRequestDto request);
-        Task<MarcaResponseDto?> UpdateMarcaAsync(int id, MarcaRequestDto request);
-        Task<bool> DeleteMarcaAsync(int id);
-    }
-
-    // La implementación real
     public class MarcaService : IMarcaService
     {
         private readonly IMarcaRepository _repository;
@@ -35,7 +24,7 @@ namespace EntregaAlex.Services
                 Nombre = m.Nombre,
                 PaisOrigen = m.PaisOrigen,
                 AnioFundacion = m.AnioFundacion,
-                ValorMercadoMillones = m.ValorMercadoMillones,
+               
                 EsAltaCostura = m.EsAltaCostura
             }).ToList();
         }
@@ -51,7 +40,7 @@ namespace EntregaAlex.Services
                 Nombre = m.Nombre,
                 PaisOrigen = m.PaisOrigen,
                 AnioFundacion = m.AnioFundacion,
-                ValorMercadoMillones = m.ValorMercadoMillones,
+                
                 EsAltaCostura = m.EsAltaCostura
             };
         }
@@ -64,9 +53,7 @@ namespace EntregaAlex.Services
                 Nombre = request.Nombre,
                 PaisOrigen = request.PaisOrigen,
                 AnioFundacion = request.AnioFundacion,
-                ValorMercadoMillones = request.ValorMercadoMillones,
                 EsAltaCostura = request.EsAltaCostura,
-                FechaAlianza = DateTime.Now // Lógica: Se registra la fecha actual automáticamente
             };
 
             // Guardamos en BBDD
@@ -79,7 +66,6 @@ namespace EntregaAlex.Services
                 Nombre = creada.Nombre,
                 PaisOrigen = creada.PaisOrigen,
                 AnioFundacion = creada.AnioFundacion,
-                ValorMercadoMillones = creada.ValorMercadoMillones,
                 EsAltaCostura = creada.EsAltaCostura
             };
         }
@@ -92,7 +78,6 @@ namespace EntregaAlex.Services
                 Nombre = request.Nombre,
                 PaisOrigen = request.PaisOrigen,
                 AnioFundacion = request.AnioFundacion,
-                ValorMercadoMillones = request.ValorMercadoMillones,
                 EsAltaCostura = request.EsAltaCostura
             };
 
@@ -105,7 +90,6 @@ namespace EntregaAlex.Services
                 Nombre = actualizada.Nombre,
                 PaisOrigen = actualizada.PaisOrigen,
                 AnioFundacion = actualizada.AnioFundacion,
-                ValorMercadoMillones = actualizada.ValorMercadoMillones,
                 EsAltaCostura = actualizada.EsAltaCostura
             };
         }
