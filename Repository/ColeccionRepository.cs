@@ -98,7 +98,6 @@ namespace EntregaAlex.Repository
                     command.Parameters.AddWithValue("@Limitada", coleccion.EsLimitada);
                     command.Parameters.AddWithValue("@Fecha", DateTime.Now);
                     command.Parameters.AddWithValue("@DiseñadorId", coleccion.DiseñadorId);
-
                     var id = await command.ExecuteScalarAsync();
                     if (id != null) coleccion.Id = Convert.ToInt32(id);
                 }
