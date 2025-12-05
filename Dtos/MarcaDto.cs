@@ -29,7 +29,7 @@ namespace EntregaAlex.Dtos
         public string Nombre { get; set; } = string.Empty;
         public string PaisOrigen { get; set; } = string.Empty;
         public int AnioFundacion { get; set; }
-        public decimal ValorMercadoMillones { get; set; }
+        
         public bool EsAltaCostura { get; set; }
         // Nota: Omitimos 'FechaAlianza' o 'Eventos' si no queremos mostrarlos aquí
     }

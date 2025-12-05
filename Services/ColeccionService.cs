@@ -1,6 +1,7 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using EntregaAlex.Models;
 using EntregaAlex.Repository;
-using EntregaAlex.Dtos;
 
 namespace EntregaAlex.Services
 {
@@ -13,97 +14,33 @@ namespace EntregaAlex.Services
             _repository = repository;
         }
 
-        public async Task<List<ColeccionResponseDto>> GetAllAsync()
+        // 1. GET ALL
+        public async Task<List<Coleccion>> GetAllColeccionesAsync()
         {
-            var lista = await _repository.GetAllAsync();
-            return lista.Select(c => new ColeccionResponseDto
-            {
-                Id = c.Id,
-                NombreColeccion = c.NombreColeccion,
-                Temporada = c.Temporada,
-                NumeroPiezas = c.NumeroPiezas,
-                PresupuestoInversion = c.PresupuestoInversion,
-                EsLimitada = c.EsLimitada,
-                FechaLanzamiento = c.FechaLanzamiento,
-                DiseñadorId = c.DiseñadorId
-            }).ToList();
+            return await _repository.GetAllColeccionesAsync();
         }
 
-        public async Task<ColeccionResponseDto?> GetByIdAsync(int id)
+        // 2. GET BY ID
+        public async Task<Coleccion?> GetByIdAsync(int id)
         {
-            var c = await _repository.GetByIdAsync(id);
-            if (c == null) return null;
-
-            return new ColeccionResponseDto
-            {
-                Id = c.Id,
-                NombreColeccion = c.NombreColeccion,
-                Temporada = c.Temporada,
-                NumeroPiezas = c.NumeroPiezas,
-                PresupuestoInversion = c.PresupuestoInversion,
-                EsLimitada = c.EsLimitada,
-                FechaLanzamiento = c.FechaLanzamiento,
-                DiseñadorId = c.DiseñadorId
-            };
+            return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<ColeccionResponseDto> CreateAsync(ColeccionRequestDto request)
+        // 3. CREATE
+        public async Task<Coleccion> CreateAsync(Coleccion coleccion)
         {
-            var nueva = new Coleccion
-            {
-                NombreColeccion = request.NombreColeccion,
-                Temporada = request.Temporada,
-                NumeroPiezas = request.NumeroPiezas,
-                PresupuestoInversion = request.PresupuestoInversion,
-                EsLimitada = request.EsLimitada,
-                DiseñadorId = request.DiseñadorId,
-                FechaLanzamiento = DateTime.Now
-            };
-
-            var creada = await _repository.CreateAsync(nueva);
-
-            return new ColeccionResponseDto
-            {
-                Id = creada.Id,
-                NombreColeccion = creada.NombreColeccion,
-                Temporada = creada.Temporada,
-                NumeroPiezas = creada.NumeroPiezas,
-                PresupuestoInversion = creada.PresupuestoInversion,
-                EsLimitada = creada.EsLimitada,
-                FechaLanzamiento = creada.FechaLanzamiento,
-                DiseñadorId = creada.DiseñadorId
-            };
+            return await _repository.CreateAsync(coleccion);
         }
 
-        public async Task<ColeccionResponseDto?> UpdateAsync(int id, ColeccionRequestDto request)
+        // 4. UPDATE
+        public async Task<Coleccion?> UpdateAsync(int id, Coleccion coleccion)
         {
-            var coleccion = new Coleccion
-            {
-                Id = id,
-                NombreColeccion = request.NombreColeccion,
-                Temporada = request.Temporada,
-                NumeroPiezas = request.NumeroPiezas,
-                PresupuestoInversion = request.PresupuestoInversion,
-                EsLimitada = request.EsLimitada,
-                DiseñadorId = request.DiseñadorId
-            };
-
-            var actualizada = await _repository.UpdateAsync(coleccion);
-            if (actualizada == null) return null;
-
-            return new ColeccionResponseDto
-            {
-                Id = actualizada.Id,
-                NombreColeccion = actualizada.NombreColeccion,
-                Temporada = actualizada.Temporada,
-                NumeroPiezas = actualizada.NumeroPiezas,
-                PresupuestoInversion = actualizada.PresupuestoInversion,
-                EsLimitada = actualizada.EsLimitada,
-                FechaLanzamiento = actualizada.FechaLanzamiento,
-                DiseñadorId = actualizada.DiseñadorId
-            };
+            // Aseguramos que el ID del objeto coincida con el de la URL
+            coleccion.Id = id;
+            return await _repository.UpdateAsync(coleccion);
         }
 
+        // 5. DELETE
         public async Task<bool> DeleteAsync(int id)
         {
             return await _repository.DeleteAsync(id);

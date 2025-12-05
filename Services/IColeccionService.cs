@@ -1,13 +1,16 @@
-using EntregaAlex.Dtos;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using EntregaAlex.Models;
 
 namespace EntregaAlex.Services
 {
+    // IMPORTANTE: 'public' para que Program.cs no de error
     public interface IColeccionService
     {
-        Task<List<ColeccionResponseDto>> GetAllAsync();
-        Task<ColeccionResponseDto?> GetByIdAsync(int id);
-        Task<ColeccionResponseDto> CreateAsync(ColeccionRequestDto request);
-        Task<ColeccionResponseDto?> UpdateAsync(int id, ColeccionRequestDto request);
+        Task<List<Coleccion>> GetAllColeccionesAsync();
+        Task<Coleccion?> GetByIdAsync(int id);
+        Task<Coleccion> CreateAsync(Coleccion coleccion);
+        Task<Coleccion?> UpdateAsync(int id, Coleccion coleccion);
         Task<bool> DeleteAsync(int id);
     }
 }
