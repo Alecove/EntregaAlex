@@ -10,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ModaLujoDB
     ports:
-      - "6038:3306" # Puerto externo 6038 -> Interno 3306
+      - "6038:3306"
     volumes:
       - mysql_data_28306:/var/lib/mysql
       - ./createDbMySqlServer.sql:/docker-entrypoint-initdb.d/init.sql
@@ -22,11 +22,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8306:8080" # Puerto externo 8306 -> Interno 8080
+      - "8306:8080"
     environment:
-      # CAMBIO REALIZADO AQUÍ: Forzamos el entorno de desarrollo
       - ASPNETCORE_ENVIRONMENT=Development
-      # Conexión a la BBDD
+      # Conexión limpia:
       - ConnectionStrings__DefaultConnection=Server=moda-lujo-db;Port=3306;Database=ModaLujoDB;Uid=root;Pwd=root;
     depends_on:
       - moda-lujo-db
