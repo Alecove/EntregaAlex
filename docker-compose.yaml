@@ -1,21 +1,34 @@
 version: '3.8'
 
 services:
-  # Servicio de Base de Datos MySQL
+  # SERVICIO 1: La Base de Datos
   moda-lujo-db:
     image: mysql:8.0
-    container_name: db-a28306  # Tu nombre de contenedor personalizado
+    container_name: db-a28306
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: manolito
-      MYSQL_DATABASE: ModaDB
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ModaLujoDB
     ports:
-      - "6038:3306"  # Puerto EXTERNO 6038 (Tus cifras invertidas) -> Puerto INTERNO 3306
+      - "6038:3306"
     volumes:
-      # Persistencia de datos (para no perder lo que guardes al apagar)
       - mysql_data_28306:/var/lib/mysql
-      # Carga automática de tu script SQL al iniciar por primera vez
       - ./createDbMySqlServer.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # SERVICIO 2: Tu API
+  api:
+    container_name: api-a28306
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8306:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Conexión limpia:
+      - ConnectionStrings__DefaultConnection=Server=moda-lujo-db;Port=3306;Database=ModaLujoDB;Uid=root;Pwd=root;
+    depends_on:
+      - moda-lujo-db
 
 volumes:
   mysql_data_28306:

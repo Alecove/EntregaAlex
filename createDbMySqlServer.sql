@@ -1,32 +1,33 @@
--- 1. PREPARACIÓN (Borrar todo para empezar limpio)
-CREATE DATABASE IF NOT EXISTS ModaDB;
-USE ModaDB;
+/*******************************************************************************
+   Creación de Base de Datos para Moda Lujo (Simplificada)
+   NOTA: Se han eliminado ValorMercadoMillones y FechaAlianza
+********************************************************************************/
+
+-- 1. PREPARACIÓN
+CREATE DATABASE IF NOT EXISTS ModaLujoDB;
+USE ModaLujoDB;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS Eventos;
 DROP TABLE IF EXISTS Prendas;
 DROP TABLE IF EXISTS Colecciones;
-DROP TABLE IF EXISTS Diseñadores;
+DROP TABLE IF EXISTS Disenadores;
 DROP TABLE IF EXISTS Marcas;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- --------------------------------------------------------
 
--- 2. TABLA MARCAS
--- Coincide con tu clase Marca.cs
+-- 2. TABLA MARCAS (Simplificada)
 CREATE TABLE Marcas (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL,
     PaisOrigen VARCHAR(100) NOT NULL,
     AnioFundacion INT NOT NULL,
-    ValorMercadoMillones DECIMAL(18,2) NOT NULL,
-    EsAltaCostura BOOLEAN NOT NULL,
-    FechaAlianza DATETIME NOT NULL
+    EsAltaCostura BOOLEAN NOT NULL
 );
 
--- 3. TABLA DISEÑADORES
--- Coincide con tu clase Diseñador.cs (tiene MarcaId)
-CREATE TABLE Diseñadores (
+-- 3. TABLA DISENADORES
+CREATE TABLE Disenadores (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     NombreCompleto VARCHAR(100) NOT NULL,
     Especialidad VARCHAR(50) DEFAULT 'General',
@@ -35,11 +36,10 @@ CREATE TABLE Diseñadores (
     EstaActivo BOOLEAN NOT NULL,
     FechaContratacion DATETIME NOT NULL,
     MarcaId INT NOT NULL,
-    CONSTRAINT fk_diseñador_marca FOREIGN KEY (MarcaId) REFERENCES Marcas(Id) ON DELETE CASCADE
+    CONSTRAINT fk_disenador_marca FOREIGN KEY (MarcaId) REFERENCES Marcas(Id) ON DELETE CASCADE
 );
 
 -- 4. TABLA COLECCIONES
--- Coincide con tu clase Coleccion.cs (tiene DiseñadorId)
 CREATE TABLE Colecciones (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     NombreColeccion VARCHAR(100) NOT NULL,
@@ -48,12 +48,11 @@ CREATE TABLE Colecciones (
     PresupuestoInversion DECIMAL(18,2) NOT NULL,
     EsLimitada BOOLEAN NOT NULL,
     FechaLanzamiento DATETIME NOT NULL,
-    DiseñadorId INT NOT NULL,
-    CONSTRAINT fk_coleccion_diseñador FOREIGN KEY (DiseñadorId) REFERENCES Diseñadores(Id) ON DELETE CASCADE
+    DisenadorId INT NOT NULL,
+    CONSTRAINT fk_coleccion_disenador FOREIGN KEY (DisenadorId) REFERENCES Disenadores(Id) ON DELETE CASCADE
 );
 
 -- 5. TABLA PRENDAS
--- Coincide con tu clase Prenda.cs (tiene ColeccionId)
 CREATE TABLE Prendas (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Tipo VARCHAR(50) NOT NULL,
@@ -67,7 +66,6 @@ CREATE TABLE Prendas (
 );
 
 -- 6. TABLA EVENTOS
--- Coincide con tu clase Evento.cs (tiene ColeccionId)
 CREATE TABLE Eventos (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Ciudad VARCHAR(100) NOT NULL,
@@ -81,16 +79,25 @@ CREATE TABLE Eventos (
 );
 
 -- --------------------------------------------------------
--- DATOS DE EJEMPLO (Para que no esté vacía al probar)
+-- DATOS DE EJEMPLO
 -- --------------------------------------------------------
 
-INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, ValorMercadoMillones, EsAltaCostura, FechaAlianza)
-VALUES ('Versace', 'Italia', 1978, 2000.00, 1, NOW());
+-- 1. Marca: Versace (Sin los campos extra)
+INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, EsAltaCostura)
+VALUES ('Versace', 'Italia', 1978, 1);
 
--- El ID de Versace será 1
-INSERT INTO Diseñadores (NombreCompleto, Especialidad, Edad, SalarioAnual, EstaActivo, FechaContratacion, MarcaId)
+-- 2. Diseñador
+INSERT INTO Disenadores (NombreCompleto, Especialidad, Edad, SalarioAnual, EstaActivo, FechaContratacion, MarcaId)
 VALUES ('Donatella Versace', 'Alta Costura', 67, 5000000.00, 1, NOW(), 1);
 
--- El ID de Donatella será 1
-INSERT INTO Colecciones (NombreColeccion, Temporada, NumeroPiezas, PresupuestoInversion, EsLimitada, FechaLanzamiento, DiseñadorId)
+-- 3. Colección
+INSERT INTO Colecciones (NombreColeccion, Temporada, NumeroPiezas, PresupuestoInversion, EsLimitada, FechaLanzamiento, DisenadorId)
 VALUES ('Medusa Power', 'Primavera-Verano', 45, 150000.00, 1, NOW(), 1);
+
+-- 4. Prenda
+INSERT INTO Prendas (Tipo, MaterialPrincipal, TallaNumerica, PrecioVenta, EnStock, FechaFabricacion, ColeccionId)
+VALUES ('Vestido de Noche', 'Seda', 38, 1200.50, 1, NOW(), 1);
+
+-- 5. Evento
+INSERT INTO Eventos (Ciudad, UbicacionExacta, CapacidadAsistentes, CosteEntrada, EsBenefico, FechaEvento, ColeccionId)
+VALUES ('Milan', 'Via Gesu 12', 500, 0.00, 0, NOW(), 1);

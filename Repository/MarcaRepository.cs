@@ -1,4 +1,4 @@
-using MySqlConnector; 
+using MySqlConnector;
 using EntregaAlex.Models;
 using Microsoft.Extensions.Configuration;
 
@@ -22,7 +22,7 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // HE QUITADO ValorMercadoMillones DE AQUÍ
+                // Columnas limpias: Solo las que existen en la BD
                 string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, EsAltaCostura FROM Marcas";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -36,8 +36,7 @@ namespace EntregaAlex.Repository
                             Nombre = reader.GetString(1),
                             PaisOrigen = reader.GetString(2),
                             AnioFundacion = reader.GetInt32(3),
-                            // ANTES ESTO ERA EL 5, AHORA ES EL 4 PORQUE QUITAMOS UNA COLUMNA
-                            EsAltaCostura = reader.GetBoolean(4) 
+                            EsAltaCostura = reader.GetBoolean(4) // Índice 4 correcto
                         };
                         listaMarcas.Add(marca);
                     }
@@ -55,7 +54,6 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // HE QUITADO ValorMercadoMillones DE AQUÍ TAMBIÉN
                 string query = "SELECT Id, Nombre, PaisOrigen, AnioFundacion, EsAltaCostura FROM Marcas WHERE Id = @Id";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -72,7 +70,6 @@ namespace EntregaAlex.Repository
                                 Nombre = reader.GetString(1),
                                 PaisOrigen = reader.GetString(2),
                                 AnioFundacion = reader.GetInt32(3),
-                                // AQUÍ TAMBIÉN CAMBIAMOS EL ÍNDICE A 4
                                 EsAltaCostura = reader.GetBoolean(4)
                             };
                         }
@@ -89,9 +86,9 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // BORRAMOS ValorMercadoMillones Y SU PARÁMETRO @Valor
-                string query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, EsAltaCostura, FechaAlianza) 
-                                 VALUES (@Nombre, @Pais, @Anio, @EsAlta, @Fecha);
+                // SQL corregido sin columnas extra
+                string query = @"INSERT INTO Marcas (Nombre, PaisOrigen, AnioFundacion, EsAltaCostura) 
+                                 VALUES (@Nombre, @Pais, @Anio, @EsAlta);
                                  SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -99,9 +96,8 @@ namespace EntregaAlex.Repository
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
                     command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
                     command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
-                    // HE BORRADO LA LÍNEA DE @Valor QUE DABA PROBLEMAS
+                    // IMPORTANTE: He añadido esta línea que faltaba en tu código original
                     command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
-                    command.Parameters.AddWithValue("@Fecha", DateTime.Now);
 
                     var idGenerado = await command.ExecuteScalarAsync();
                     if (idGenerado != null)
@@ -120,7 +116,6 @@ namespace EntregaAlex.Repository
             {
                 await connection.OpenAsync();
 
-                // BORRAMOS ValorMercadoMillones DEL UPDATE
                 string query = @"UPDATE Marcas 
                                  SET Nombre = @Nombre, PaisOrigen = @Pais, AnioFundacion = @Anio, 
                                      EsAltaCostura = @EsAlta 
@@ -132,17 +127,16 @@ namespace EntregaAlex.Repository
                     command.Parameters.AddWithValue("@Nombre", marca.Nombre);
                     command.Parameters.AddWithValue("@Pais", marca.PaisOrigen);
                     command.Parameters.AddWithValue("@Anio", marca.AnioFundacion);
-                    // BORRADO EL PARÁMETRO @Valor
                     command.Parameters.AddWithValue("@EsAlta", marca.EsAltaCostura);
 
                     int filasAfectadas = await command.ExecuteNonQueryAsync();
-                    if (filasAfectadas == 0) return null; 
+                    if (filasAfectadas == 0) return null;
                 }
             }
             return marca;
         }
 
-        // 5. BORRAR (DELETE) - ESTE SE QUEDA IGUAL
+        // 5. BORRAR (DELETE)
         public async Task<bool> DeleteAsync(int id)
         {
             using (var connection = new MySqlConnection(_connectionString))
